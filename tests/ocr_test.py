@@ -53,8 +53,8 @@ def test_date_penelco_1_0(test_notice_penelco_1_0: Notice):
 def test_date_penelco_2_0(test_notice_penelco_2_0: Notice):
     assert test_notice_penelco_2_0.get_date() == datetime.date(2023, 9, 16)
 
-# def test_time_ngcp_0(test_notice_ngcp_0: Notice):
-#     assert test_notice_ngcp_0.get_time() == [(datetime.time(7, 0), datetime.time(19, 0))]
+def test_time_ngcp_0(test_notice_ngcp_0: Notice):
+    assert test_notice_ngcp_0.get_time() == [(datetime.time(7, 0), datetime.time(19, 0))]
 
 def test_time_penelco_1_0(test_notice_penelco_1_0: Notice):
     assert test_notice_penelco_1_0.get_time() == [(datetime.time(9, 0), datetime.time(16, 0))]

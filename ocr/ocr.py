@@ -13,7 +13,8 @@ PENELCO_2_MARGIN = 28
 PENELCO_2_WIDTH = 489
 
 date_regex = re.compile(r"([a-zA-Z]+)\s+(\d+),\s+(\d+)")
-time_regex = re.compile(r"(\d+):(\d+)(AM|PM)")
+time_regex = re.compile(r"([0123456789oOQ]+):([01345oOQ]+)(AM|PM)")
+zero_like = re.compile(r"[oOQ]")
 
 month_mapping = {
     "JANUARY": 1,
@@ -30,8 +31,12 @@ month_mapping = {
     "DECEMBER": 12
 }
 
-TIME_BOX_THRESHOLD = 20
-NGCP_TIME_BOX_LUT = [i if i < TIME_BOX_THRESHOLD else 255 for i in range(256)] * 3
+def callback(r, g, b):
+    if g > 50 or r > 50 or b > 50:
+        return (255, 255, 255)
+    else:
+        return (r, g, b)
+COLOR3DLUT = ImageFilter.Color3DLUT.generate(32, callback)
 
 class NoticeType(IntEnum):
     NGCP = 0  # The green and yellow image
@@ -220,36 +225,37 @@ class Notice:
 
         image = self.image.crop(self.notice_type.time_box())
 
-        def ngcp_preprocessing(image):
+        def preprocessing(image):
             WIDTH_SCALE = 8
-            HEIGHT_SCALE = 2
+            HEIGHT_SCALE = 8
 
             image = image.resize((WIDTH_SCALE * image.width, HEIGHT_SCALE * image.height), Resampling.LANCZOS)
 
-            image = image.point(NGCP_TIME_BOX_LUT)
-            image = image.filter(filter=ImageFilter.GaussianBlur(radius=4))
+            # image = image.point(NGCP_TIME_BOX_LUT)
+            image = image.filter(COLOR3DLUT)
+            image = image.filter(filter=ImageFilter.GaussianBlur(radius=2))
+
             enhance = ImageEnhance.Contrast(image)
             image = enhance.enhance(5.0)
-
+            
             return image
 
-        text = pytesseract.image_to_string(image, config="--oem 1 --psm 7")
-
         def parse_time(m):
-            hour, minute = map(int, m[:-1])
-            match m[-1]:
+            hour = int(zero_like.sub("0", m[0]))
+            match m[2]:
                 case "AM":
                     if hour == 12:
                         hour = 0
                 case "PM":
                     if hour < 12:
                         hour += 12
+            minute = int(zero_like.sub("0", m[1]))
             return datetime.time(hour, minute)
         
         def parse_time_range(text):
             time = []
             matches = time_regex.findall(text)
-            print('>>>', text)
+            # print('>>>', text)
             assert len(matches) > 0 and len(matches) % 2 == 0
 
             for i in range(0, len(matches), 2):
@@ -258,17 +264,18 @@ class Notice:
                 time.append((start, end))
             return time
 
+        image = preprocessing(image)
+        config = "--oem 1 --psm 7"
         try:
+            text = pytesseract.image_to_string(image, config=config)
             return parse_time_range(text)
         except AssertionError:
+            image = image.resize((image.width, image.height // 4), Resampling.LANCZOS)
+            text = pytesseract.image_to_string(image, config=config)
             try:
-                preprocessed = ngcp_preprocessing(image)
-                text = pytesseract.image_to_string(preprocessed, config="--oem 1 --psm 7")
                 return parse_time_range(text)
-            except AssertionError:  
-                image.show()
-                text = input("Enter correct time range text: ")
-                return parse_time_range(text)
+            except AssertionError:
+                return []
 
 
 

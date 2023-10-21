@@ -1,11 +1,22 @@
 from ocr.ocr import Notice, NoticeType
 from PIL import Image
 
-fp = "tests/data/ngcp/1.jpg"
 fp = "tests/data/penelco_1/0.jpg"
-fp = "tests/data/ngcp/0.jpg"
+# fp = "tests/data/ngcp/0.jpg"
 notice = Notice(Image.open(fp))
 # print(notice.get_date())
+print(notice.get_time())
+
+fp = "tests/data/ngcp/1.jpg"
+notice = Notice(Image.open(fp))
+print(notice.get_time())
+
+fp = "tests/data/ngcp/0.jpg"
+notice = Notice(Image.open(fp))
+print(notice.get_time())
+
+fp = "tests/data/penelco_2/0.jpg"
+notice = Notice(Image.open(fp))
 print(notice.get_time())
 
 # 5:30AM TO 7:30AM and 5:45PM TO 6:00PM

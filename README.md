@@ -4,6 +4,6 @@ Power company on where I live gives power outage notifications on Facebook by po
 
 This repository is my attempt to automate the process of checking such notifications.
 
-# Legal
+## Legal
 
 The images here are all public information.
