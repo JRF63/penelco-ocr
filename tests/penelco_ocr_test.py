@@ -3,7 +3,7 @@ import datetime
 
 import pytest
 
-from ocr.ocr import NoticeType, Notice
+from penelco_ocr import NoticeType, Notice
 from PIL import Image
 
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
