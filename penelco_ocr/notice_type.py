@@ -1,4 +1,4 @@
-from enum import IntEnum
+import enum
 
 PENELCO_1_MARGIN = 40
 PENELCO_1_WIDTH = 482
@@ -6,10 +6,10 @@ PENELCO_2_MARGIN = 28
 PENELCO_2_WIDTH = 489
 
 
-class NoticeType(IntEnum):
-    NGCP = 0  # The green and yellow image
-    PENELCO_1 = 1  # With the `Purpose` box
-    PENELCO_2 = 2  # Without the `Purpose` box
+class NoticeType(enum.IntEnum):
+    NGCP = enum.auto()      # The green and yellow image
+    PENELCO_1 = enum.auto() # With the `Purpose` box
+    PENELCO_2 = enum.auto() # Without the `Purpose` box
 
     def image_resolution(self) -> tuple[int, int]:
         match self:
@@ -19,6 +19,7 @@ class NoticeType(IntEnum):
                 return 1280, 720
 
     def discriminant_pixel_color(self) -> tuple[int, int, int]:
+        """Pixel color around the upper-left of the image"""
         match self:
             case NoticeType.NGCP:
                 return (255, 255, 0)  # yellow

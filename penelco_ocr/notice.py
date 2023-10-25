@@ -78,7 +78,9 @@ class Notice:
             day = int(m.group(2))
             year = int(m.group(3))
             return datetime.date(year, month, day)
-        return None
+        else:
+            # TODO: Levenshtein distance
+            return None
 
     def get_time(self) -> list[tuple[datetime.time, datetime.time]]:
         image = self.image.crop(self.notice_type.time_box())
@@ -137,31 +139,16 @@ class Notice:
                 return parse_time_range(text)
             except AssertionError:
                 return []
-            
-    def get_activity(self):
+
+    def get_activity(self) -> str:
         image = self.image.crop(self.notice_type.activity_box())
         text = pytesseract.image_to_string(image)
-        return text
+        return " ".join(text.split("\n"))
 
-
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
-
-# driver = webdriver.Firefox()
-
-# driver.get("https://www.selenium.dev/selenium/web/web-form.html")
-
-# title = driver.title
-
-# driver.implicitly_wait(0.5)
-
-# text_box = driver.find_element(by=By.NAME, value="my-text")
-# submit_button = driver.find_element(by=By.CSS_SELECTOR, value="button")
-
-# text_box.send_keys("Selenium")
-# submit_button.click()
-
-# message = driver.find_element(by=By.ID, value="message")
-# text = message.text
-
-# driver.quit()
+    def get_purpose(self) -> str | None:
+        box = self.notice_type.purpose_box()
+        if box is not None:
+            image = self.image.crop(box)
+            text = pytesseract.image_to_string(image)
+            return " ".join(text.split("\n"))
+        return None
